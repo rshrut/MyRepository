@@ -1,0 +1,78 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import web3logo_home from "../../assets/images/web3logo_home.svg";
+
+const Home = () => {
+  return (
+    <div className="s_home_outer">
+      <div className="container s_home_upper">
+        <div className="s_dashboard">
+          <Link to={"/register-user"} className="btn btn-primary s_register">Register</Link>
+          <Link to={"/dashboard"} className="btn btn-primary s_db">
+            Dashboard
+          </Link>
+        </div>
+        <div className="s_home-content">
+          <img src={web3logo_home}/>
+          <p className="s_home-intro">
+            Customise it to match your brand,user interface design,and any
+            <br />
+            specific requirements or features your check-in and checkout
+            <br />
+            process may have.
+          </p>
+        </div>
+      </div>
+      <div className="s_home-lower">
+        <div>
+        <div className="container s_card-container">
+          <div className="row">
+            <div className="col-10 offset-2">
+                <div className="row">
+                  <div className="col-lg-3 col-md-6 col-sm-12 card">
+                    <div className="s_card-content">
+                      <p>
+                        You need to update
+                        <br/>
+                        your contact info
+                        <br/>
+                        now
+                      </p>
+                      <Link to={"/dashboard"} className="btn s_checkin">checkin</Link>
+                    </div>
+                  </div>
+                  <div className="col-lg-3 col-md-6 col-sm-12 card">
+                    <div className="s_card-content">
+                      <p>
+                        You need to update
+                        <br/>
+                        your contact info
+                        <br/>
+                        now
+                      </p>
+                      <Link to={"/checkout"} className="btn s_checkout">checkout</Link>
+                    </div>
+                  </div>
+                  <div className="col-lg-3 col-md-6 col-sm-12 card">
+                    <div className="s_card-content">
+                      <p>
+                        You need to update
+                        <br />
+                        your contact info
+                        <br />
+                        now
+                      </p>
+                      <Link className="btn s_add-visitor" to={'/new-visitor'}>Add Visitor</Link>
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Home;
