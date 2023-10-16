@@ -1,0 +1,329 @@
+import React, { useEffect, useState } from "react";
+import "../../assets/css/style.css";
+import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import balaPic from "../../assets/images/balaPic.svg";
+import shopiaPic from "../../assets/images/shopiaPic.svg";
+import ajayPic from "../../assets/images/ajayPic.svg";
+import activeLogo from "../../assets/images/ActiveLogo.svg";
+import addLogo from "../../assets/images/addLogo.svg";
+import murphyPic from "../../assets/images/murphyPic.svg";
+import { getApiCall, postApiCall } from "../../Utils/Utils";
+import { Modal } from "react-bootstrap";
+
+
+function Main() {
+  const [count, setCount] = useState([]);
+  const [data, setData] = useState([]);
+  const [approvedList, setApprovedList] = useState([]);
+  const [checkedInList, setCheckedInList] = useState([]);
+  const [showModal,setShowModal]=useState(false);
+  const [verifyCode,setVerifyCode]=useState("");
+  const [reason,setReason]=useState("");
+  useEffect(() => {
+    getDashboardList();
+  }, []);
+  const getDashboardList = () =>{
+    getApiCall("merchant/auth/visitor/dashboard", (response) => {
+      if (response.success) {
+        setCount(response.data.appointment);
+        setData(response.data.allVisitors);
+        setApprovedList(response.data.approvedList);
+        setCheckedInList(response.data.checkedInList);
+        console.log(response);
+      } else {
+        toast.error(response.message);
+      }
+    });
+  }
+  const getApprovedTime = (isoTime) => {
+    let fullTime = new Date(isoTime).toLocaleTimeString();
+    const [hourString, minute] = fullTime.split(":");
+    const hour = +hourString % 24;
+    return (hour % 12 || 12) + ":" + minute + (hour < 12 ? "AM" : "PM");
+  };
+  function diff_minutes(localtime, isoTime) {
+    var diff = (localtime.getTime() - isoTime.getTime()) / 1000;
+    diff /= 60;
+    return Math.round(diff);
+  }
+  const getCheckedInTime = (isoTime) => {
+    let localtime = new Date();
+    let isoTime1 = new Date(isoTime);
+    return diff_minutes(localtime, isoTime1);
+  };
+
+  const handleCheckIn = (id) => {
+    console.log(id);
+    postApiCall(`merchant/auth/visitor/checkin/${id}`,(response) => {
+      if (response.success) {
+        console.log(response);
+         getDashboardList();
+      } else {
+        console.log(response.message);
+        toast.error("error occured");
+      }
+    });
+  }
+  const handleModalOpenClose=(id)=>{
+    setVerifyCode(id);
+    setShowModal(!showModal);
+  }
+  const handleCheckOut=()=>{
+    const postData={
+      verificationCode:verifyCode,
+      reason:reason,
+    }
+    postApiCall("merchant/auth/visitor/checkout",postData,(response)=>{
+      if(response.success){
+        console.log(response);
+        setShowModal(!showModal);
+        setVerifyCode("");
+        setReason("");
+        getDashboardList();
+      }
+      else{
+        toast.error(response.message);
+      }
+    });
+  }
+  return (
+    <div className="page">
+      <div className="mainCont">
+        <div className="row">
+          <div className="col-sm-12 col-md-6 col-lg-4">
+            <div className="first">
+              <div className="views">
+                <div className="num1">
+                  <div className="num">{count.TodaysVistors}</div>
+                  <div className="visitor">Today Visitor's</div>
+                </div>
+                <div className="num1">
+                  <div className="sNum"> {count.Completed} Completed</div>
+                  <div className="sNum">{count.Pending} Balance</div>
+                </div>
+              </div>
+              <div className="host">
+                <div className="host1">
+                  <div className="colHead">Available Host</div>
+                  <Link>See More</Link>
+                </div>
+                <div className="host2">
+                  <div className="profilePic">
+                    <img src={balaPic} alt="profile"/>
+                    <img className="active" src={activeLogo} alt="active"/>
+                  </div>
+                  <div className="details">
+                    <div className="name">Bala E</div>
+                    <div className="empId">Employee ID : IPPO487</div>
+                  </div>
+                </div>
+                <div className="host2">
+                  <div className="profilePic">
+                    <img src={balaPic} alt="profile" />
+                    <img className="active" src={activeLogo} alt="active"/>
+                  </div>
+                  <div className="details">
+                    <div className="name">Bala E</div>
+                    <div className="empId">Employee ID : IPPO487</div>
+                  </div>
+                </div>
+                <div className="host2">
+                  <div className="profilePic">
+                    <img src={balaPic} alt="profile" />
+                    <img className="active" src={activeLogo} alt="active"/>
+                  </div>
+                  <div className="details">
+                    <div className="name">Bala E</div>
+                    <div className="empId">Employee ID : IPPO487</div>
+                  </div>
+                </div>
+                <div className="host2">
+                  <div className="profilePic">
+                    <img src={shopiaPic} alt="profile" />
+                    <img className="active" src={activeLogo} alt="active"/>
+                  </div>
+                  <div className="details">
+                    <div className="name">Shopia Ronald</div>
+                    <div className="empId">Employee ID : IPPO465</div>
+                  </div>
+                </div>
+                <div className="host2">
+                  <div className="profilePic">
+                    <img src={ajayPic} alt="profile" />
+                    <img className="active" src={activeLogo} alt="active"/>
+                  </div>
+                  <div className="details">
+                    <div className="name">Ajay </div>
+                    <div className="empId">Employee ID : IPPO938</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-sm-12 col-md-6 col-lg-4">
+            <div className="second">
+              <div className="colHead">Approved List</div>
+              {approvedList?.length > 0 ? (
+                approvedList.map((item, index) => {
+                  return (
+                    <div className="approveData" key={index}>
+                      <div className="approve">
+                        <div className="datas">
+                          <div className="approveProfile">
+                            <img src={shopiaPic} alt="profile" />
+                          </div>
+                          <div className="approveDetails">
+                            <div className="name">{item.visitorName}</div>
+                            <div className="empId">{item.visitorEmail}</div>
+                          </div>
+                        </div>
+                        <button className="check" onClick={()=>{handleCheckIn(item.verificationCode)}}>
+                            checkin     
+                        </button>
+                      </div>
+                      <div className="extraDetails">
+                        <div className="date">
+                          <div className="empId">
+                            Approved by :{item.approvedBy}
+                          </div>
+                          <div className="empId time">
+                            {`${new Date(
+                              item.appointmentTime.fromTime
+                            ).toLocaleDateString()} | ${getApprovedTime(
+                              item.appointmentTime.fromTime
+                            )}-${getApprovedTime(item.appointmentTime.toTime)}`}
+                          </div>
+                        </div>
+                        <div className="empId">ID : {item.visitorId}</div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="checkedin-box">
+                  <div className="approved-empty">No records found</div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="col-sm-12 col-md-6 col-lg-4 ">
+            <div className="third">
+              <Link className="addnew add" to={"/new-visitor"}>
+                <img className="addLogo" src={addLogo} alt="add" />
+                Add New Visitor
+              </Link>
+              <div className="checkIn">
+                <div className="colHead">Checked in</div>
+                {checkedInList?.length > 0 ? (
+                  checkedInList.map((item, index) => {
+                    return (
+                      <div className="displayData" key={index}>
+                        <div className="one">
+                          <div className="checkName">
+                            <div className="approveProfile">
+                              <img src={murphyPic} alt="profile" />
+                            </div>
+                            <div className="approveDetails">
+                              <div className="name">{item.visitorName}</div>
+                              <div className="empId">{item.visitorEmail}</div>
+                            </div>
+                          </div>
+                          <div className="checkin-time">
+                            {`${getCheckedInTime(item.checkIntime)}m`}
+                          </div>
+                        </div>
+                        <div className="two">
+                          <div className="empId">ID : {item.visitorId}</div>
+                          <div>
+                            <button className="checkOut" onClick={()=>{handleModalOpenClose(item.verificationCode)}}>Checkout</button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="checkedin-box">
+                    <div className="approved-empty">No records found</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="table-responsive sec2">
+          <div className="tab_top">
+            <div className="tab_visitors">All Visitors</div>
+            <Link className="tab_link">View all</Link>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <td className="tab_head">S No</td>
+                <td className="tab_head">Name</td>
+                <td className="tab_head">Visitor ID</td>
+                <td className="tab_head">Email</td>
+                <td className="tab_head">Visits</td>
+                <td className="tab_head">Date & Time</td>
+                <td className="tab_head">Action</td>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.length > 0 ? (
+                data.map((item, index) => {
+                  return (
+                    <tr key={index}>
+                      <td className="tab_body">{index + 1}</td>
+                      <td className="tab_body">{item.name}</td>
+                      <td className="tab_body">{item.visitorId}</td>
+                      <td className="tab_body">{item.email}</td>
+                      <td className="tab_body">{item.visits}</td>
+                      <td className="tab_body">{`${new Date(
+                        item.appointmentFrom
+                      ).toLocaleDateString()} & ${new Date(
+                        item.appointmentFrom
+                      ).toLocaleTimeString()}`}</td>
+                      <td className="text-body">{item.status}</td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td className="empty_text" colSpan={7}>
+                    No records found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <Modal
+          show={showModal}
+          onHide={handleModalOpenClose}
+          centered
+          dialogClassName="custom-modal"
+        >
+         <Modal.Header closeButton className="Pmodal_header">
+            <Modal.Title>Reason</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="Pmodal_header">
+            <input className="s_modal-input" type="text" value={reason} 
+            onChange={(e)=>setReason(e.target.value)}
+             />
+          </Modal.Body>
+          <Modal.Footer className="Pmodal_header">
+            <Link
+              variant="primary"
+              onClick={handleCheckOut}
+              className="Pblock-btn2"
+            >
+              Ok
+            </Link>
+          </Modal.Footer>
+        </Modal>
+      </div>
+      <ToastContainer />
+    </div>
+  );
+}
+export default Main;
